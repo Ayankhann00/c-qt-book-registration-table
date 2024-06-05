@@ -1,0 +1,134 @@
+#ifndef BOOK_H
+#define BOOK_H
+
+#include <QString>
+
+class Book {
+public:
+Book(QString author, QString isbn, QString publicationDate);
+ QString getAuthor() const;
+void setAuthor(const QString& author);
+QString getIsbn() const;
+void setIsbn(const QString& isbn);
+QString getPublicationDate() const;
+void setPublicationDate(const QString& publicationDate);
+
+private:
+QString author_;
+QString isbn_;
+QString publicationDate_;
+};
+
+#endif // BOOK_H
+// book.cpp
+#include "book.h"
+
+Book::Book(QString author, QString isbn, QString publicationDate): author_(author), isbn_(isbn), publicationDate_(publicationDate) {}
+
+QString Book::getAuthor() const {
+    return author_;
+}
+
+void Book::setAuthor(const QString& author) {
+    author_ = author;
+}
+
+QString Book::getIsbn() const {
+    return isbn_;
+}
+
+void Book::setIsbn(const QString& isbn) {
+    isbn_ = isbn;
+}
+
+QString Book::getPublicationDate() const {
+    return publicationDate_;
+}
+
+void Book::setPublicationDate(const QString& publicationDate) {
+    publicationDate_ = publicationDate;
+}
+// mainwindow.h
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+#include <QVector>
+#include "book.h"
+
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow {
+Q_OBJECT
+
+public:
+explicit MainWindow(QWidget* parent = nullptr);
+~MainWindow();
+
+private slots:
+void on_registerButton_clicked();
+void on_updateButton_clicked();
+
+private:
+    Ui::MainWindow* ui;
+    QVector<Book> books_;
+};
+
+#endif // MAINWINDOW_H
+// mainwindow.cpp
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+ui->setupUi(this);
+ui->tableWidget->setColumnCount(4);
+ui->tableWidget->setHorizontalHeaderLabels({"Author", "ISBN", "Publication Date"});
+}
+
+MainWindow::~MainWindow() {
+delete ui;
+}
+
+void MainWindow::on_registerButton_clicked() {
+QString author = ui->authorLineEdit->text();
+QString isbn = ui->isbnLineEdit->text();
+QString publicationDate = ui->publicationDateLineEdit->text();
+
+Book book(author, isbn, publicationDate);
+books_.push_back(book);
+
+int row = ui->tableWidget->rowCount();
+ui->tableWidget->insertRow(row);
+ui->tableWidget->setItem(row, 0, new QTableWidgetItem(author));
+ui->tableWidget->setItem(row, 1, new QTableWidgetItem(isbn));
+ui->tableWidget->setItem(row, 2, new QTableWidgetItem(publicationDate));
+}
+
+void MainWindow::on_updateButton_clicked() {
+int row = ui->tableWidget->currentRow();
+if (row != -1) {
+QString author = ui->authorLineEdit->text();
+QString isbn = ui->isbnLineEdit->text();
+QString publicationDate = ui->publicationDateLineEdit->text();
+
+Book& book = books_[row];
+book.setAuthor(author);
+book.setIsbn(isbn);
+book.setPublicationDate(publicationDate);
+ui->tableWidget->item(row, 0)->setText(author);
+ ui->tableWidget->item(row, 1)->setText(isbn);
+ui->tableWidget->item(row, 2)->setText(publicationDate);
+    }
+}
+// main.cpp
+#include "mainwindow.h"
+#include <QApplication>
+
+int main(int argc, char* argv[]) {
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+    return a.exec();
+}
